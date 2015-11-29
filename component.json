@@ -1,0 +1,8 @@
+{
+	"name": "sticky",
+	"version": "1.0.0",
+	"main": "./sticky.js",
+	"dependencies": {
+		"zepto": "~1.1.6"
+	}
+}
