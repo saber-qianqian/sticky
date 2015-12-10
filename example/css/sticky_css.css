@@ -1,0 +1,52 @@
+body{
+	font-size: 20px;
+	color: #ccc;
+	background-color: #f8f8f8;
+}
+
+
+section{
+	margin-top: 20px;
+	background-color: #666;
+	padding: 20px;
+}
+
+.sticky_title{
+	position: -webkit-sticky;
+	position: sticky;
+	background-color: #555;
+	text-align: center;
+	padding: 10px;
+
+	top: 0;
+	left: 0;
+}
+.content{
+	color: #666;
+	background-color: #f4f4f4;
+	padding: 10px;
+}
+
+/* 纵向滚动时，只有设定top值之后才生效，left值不影响效果 */
+.block_1 .sticky_title{ top: auto; }
+
+/* sticky元素不影响生效后的文档流 */
+.block_2{ padding: 20px 0;}
+
+/* sticky元素top值是距离窗口顶部的值，与父元素定位无关 */
+.block_3 .sticky_title{ top: 100px;margin-bottom: 100px; }
+.block_8{ display: none;position: absolute;margin-top: 100px;top: 300px;left: 0;width: 100%;box-sizing: border-box;background-color: red;}
+.block_8 .sticky_title{ top: 50px; }
+
+/* sticky元素的margin对定位效果没有影响，但会影响文档流 */
+.block_4 .sticky_title{ margin-top: 30px; }
+
+/* left和top不影响文档流，所以和position:relative;还是有区别的 */
+.block_5 .sticky_title{ width: 60%;left: 20px;top: 200px; }
+ /*但是脱离文档流之后，left和right值会按方向生效 */ /*todo*/
+.block_7 .sticky_title{ width: 30%;float: left;left: 20px;top: -10px; }
+section.block_7 .sticky_title_2{ width: 30%;float: left;left: 200px;top: 50px; }
+
+/* 同一父元素下，sticky元素会有先后顺序，有层级的概念*/
+.block_6 .sticky_title:first-child{ width: 60%;padding: 50px 0;z-index: 20; }
+
