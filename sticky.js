@@ -2,14 +2,6 @@
  * @description sticky封装
  * @author qianyun
  * @augments {sticky ele classname}
- * @todo 支持上滑隐藏，下滑出现
- *       fixed时, top值定位
- *       支持定位元素
- *
- * @limit
- * 		width: 100%;
- * 		top: 0;
- * 		left: 0;
  *
  * @done sticky 基本功能完成
  *				支持多组sticky控件
@@ -157,6 +149,11 @@
 			_self.marginB = parseInt($ele.css('margin-bottom'), 10) || 0
 			_self.fixTop = parseInt($ele.css('top'), 10) || 0
 			_self.fixLeft = $ele.offset().left
+
+			// 计算正确的左右位置，必须在父元素框内
+			var fixML = (parseInt(left, 10) || 0) - _self.fixLeft
+			fixML = fixML > 0 ? fixML : 0
+			$ele.css('margin-left', fixML)
 		},
 
 		parentInit: function(){
@@ -170,7 +167,8 @@
 			$ele.wrapAll('<div style="position: relative;" id="' + getParentId() + '" class="sticky_ele_copy"></div>')
 
 			$parent = $ele.parents('.sticky_ele_copy')
-			$parent.css({'height': $parent.height(), 'width': $parent.width(), 'overflow': 'visible', 'margin-top': $ele.css('margin-top'), 'margin-bottom': $ele.css('margin-bottom')})
+			$parent.css('float', $ele.css('float'))
+			$parent.css({'height': $parent.height(), 'width': $ele.width(), 'overflow': 'visible', 'margin-top': $ele.css('margin-top'), 'margin-bottom': $ele.css('margin-bottom')})
 
 			_self.$parent = $parent
 		},
