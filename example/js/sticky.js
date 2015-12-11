@@ -43,8 +43,11 @@ var Sticky = function(ele, options){
 	this.options = options
 	this.endPos = 0
 	this.fixTop = 0
+	this.fixLeft = 0
 	this.startPos = 0
 	this.bottomTop = 0
+	this.marginB = 0
+	this.marginT = 0
 	this.useFixedFlag = true
 }
 
@@ -113,8 +116,8 @@ Sticky.prototype = {
 	useFixed: function(){
 		var _self = this
 
-		_self.parentInit()
 		_self.eleInit()
+		_self.parentInit()
 
 		if(_self.useFixedFlag){
 			_self.setPos()
@@ -145,10 +148,18 @@ Sticky.prototype = {
 		ele_style['left'] = left == 'auto' ? 0 : left
 		ele_style['width'] = width
 
+		ele_style['border'] = $ele.css('border')
+		ele_style['padding'] = $ele.css('padding')
+		ele_style['z-index'] = $ele.css('position', 'relative').css('z-index')
+		$ele.css('position', 'static')
+
 		$ele.css(ele_style)
 
 		// 搬家
+		_self.marginT = parseInt($ele.css('margin-top'), 10) || 0
+		_self.marginB = parseInt($ele.css('margin-bottom'), 10) || 0
 		_self.fixTop = parseInt($ele.css('top'), 10) || 0
+		_self.fixLeft = $ele.offset().left
 	},
 
 	parentInit: function(){
@@ -159,10 +170,10 @@ Sticky.prototype = {
 		// getParentId()之后 stickyIndex 会自动加1
 		_self.stickyIndex = stickyIndex
 
-		$ele.wrapAll('<div style="overflow: hidden;position: relative;" id="' + getParentId() + '" class="sticky_ele_copy"></div>')
+		$ele.wrapAll('<div style="position: relative;" id="' + getParentId() + '" class="sticky_ele_copy"></div>')
 
 		$parent = $ele.parents('.sticky_ele_copy')
-		$parent.css({'height': $parent.height(), 'width': $parent.width(), 'overflow': 'visible'})
+		$parent.css({'height': $parent.height(), 'width': $parent.width(), 'overflow': 'visible', 'margin-top': $ele.css('margin-top'), 'margin-bottom': $ele.css('margin-bottom')})
 
 		_self.$parent = $parent
 	},
@@ -173,17 +184,17 @@ Sticky.prototype = {
 
 		if(_self.config.infinity){
 			if(winPos > _self.startPos){
-				_self.$ele.css({'position': 'fixed', 'top': _self.fixTop})
+				_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
 			} else {
-				_self.$ele.css({'position': 'static', 'top': 0})
+				_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
 			}
 		} else {
 			if(winPos > _self.endPos){
-				_self.$ele.css({'position': 'absolute', 'top': _self.bottomTop})
+				_self.$ele.css({'position': 'absolute', 'top': _self.bottomTop, 'left': 0})
 			} else if(winPos < _self.startPos) {
-				_self.$ele.css({'position': 'static', 'top': 0})
+				_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
 			} else if(winPos < _self.endPos && winPos > _self.startPos){
-				_self.$ele.css({'position': 'fixed', 'top': _self.fixTop})
+				_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
 			}
 		}
 	},
@@ -208,7 +219,7 @@ Sticky.prototype = {
 			, containerH = container.height()
 			, containerT = container.offset().top
 
-		_self.endPos = containerH - containerPb - containerBb - eleH + containerT
+		_self.endPos = containerH - containerPb - containerBb - eleH + containerT - _self.marginB - _self.fixTop
 		_self.bottomTop = _self.endPos - _self.startPos
 	},
 
