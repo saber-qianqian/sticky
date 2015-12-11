@@ -21,6 +21,11 @@ section{
 	top: 0;
 	left: 0;
 }
+.css_page .sticky_title{
+	position: -webkit-sticky;
+	position: sticky;
+}
+
 .content{
 	color: #666;
 	background-color: #f4f4f4;
@@ -47,5 +52,5 @@ section{
 .block_7 .sticky_title{ width: 30%;float: left;left: 50px;top: 0; }
 
 /* 同一父元素下，sticky元素会有先后顺序，有层级的概念*/
-.block_6 .sticky_title:first-child{ width: 60%;padding: 50px 0;z-index: 20; }
+.block_6 .sticky_title:first-child{ width: 60%;padding: 50px 0; }
 
