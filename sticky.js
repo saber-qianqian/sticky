@@ -40,8 +40,12 @@
 		this.options = options
 		this.endPos = 0
 		this.fixTop = 0
+		this.fixLeft = 0
 		this.startPos = 0
 		this.bottomTop = 0
+		this.marginB = 0
+		this.marginT = 0
+		this.useFixedFlag = true
 	}
 
 	Sticky.prototype = {
@@ -55,7 +59,7 @@
 			var _self = this
 
 			_self.config = $.extend({}, _self.defaults, _self.options)
-			_self.fixTop = _self.config.sticky_top
+			// _self.fixTop = _self.config.sticky_top
 
 			if(!_self.hasSticky()){
 				_self.useFixed()
@@ -88,13 +92,20 @@
 
 			var old_style = _self.$ele.attr('style')
 
+			// 为啥不直接使用CSS
 			if(typeof old_style == 'string'){
-				old_style += 'position: -webkit-sticky;position: sticky;'
+				old_style += ';position: -webkit-sticky;position: sticky;'
 			} else {
 				old_style = 'position: -webkit-sticky;position: sticky;'
 			}
 
-			old_style += 'top:' + _self.fixTop + 'px;'
+			// 处理auto情况
+			if(!_self.useFixedFlag){
+				old_style += 'top:auto;'
+			} else{
+				old_style += 'top:' + _self.fixTop + 'px;'
+			}
+
 
 			_self.$ele.attr('style', old_style)
 		},
@@ -102,13 +113,15 @@
 		useFixed: function(){
 			var _self = this
 
-			_self.parentInit()
 			_self.eleInit()
+			_self.parentInit()
 
-			_self.setPos()
+			if(_self.useFixedFlag){
+				_self.setPos()
 
-			_self.handleScroll()
-			_self.bindEvents()
+				_self.handleScroll()
+				_self.bindEvents()
+			}
 		},
 
 		eleInit: function(){
@@ -124,11 +137,26 @@
 					'z-index' : 100
 				}
 
+			if(top == 'auto'){
+				_self.useFixedFlag = false
+			}
+
 			ele_style['top'] = top == 'auto' ? 0 : top
 			ele_style['left'] = left == 'auto' ? 0 : left
 			ele_style['width'] = width
 
+			ele_style['border'] = $ele.css('border')
+			ele_style['padding'] = $ele.css('padding')
+			ele_style['z-index'] = $ele.css('position', 'relative').css('z-index')
+			$ele.css('position', 'static')
+
 			$ele.css(ele_style)
+
+			// 搬家
+			_self.marginT = parseInt($ele.css('margin-top'), 10) || 0
+			_self.marginB = parseInt($ele.css('margin-bottom'), 10) || 0
+			_self.fixTop = parseInt($ele.css('top'), 10) || 0
+			_self.fixLeft = $ele.offset().left
 		},
 
 		parentInit: function(){
@@ -139,10 +167,10 @@
 			// getParentId()之后 stickyIndex 会自动加1
 			_self.stickyIndex = stickyIndex
 
-			$ele.wrapAll('<div style="overflow: hidden;position: relative;" id="' + getParentId() + '" class="sticky_ele_copy"></div>')
+			$ele.wrapAll('<div style="position: relative;" id="' + getParentId() + '" class="sticky_ele_copy"></div>')
 
 			$parent = $ele.parents('.sticky_ele_copy')
-			$parent.css({'height': $parent.height(), 'width': $parent.width(), 'overflow': 'visible'})
+			$parent.css({'height': $parent.height(), 'width': $parent.width(), 'overflow': 'visible', 'margin-top': $ele.css('margin-top'), 'margin-bottom': $ele.css('margin-bottom')})
 
 			_self.$parent = $parent
 		},
@@ -153,17 +181,17 @@
 
 			if(_self.config.infinity){
 				if(winPos > _self.startPos){
-					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop})
+					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
 				} else {
-					_self.$ele.css({'position': 'static', 'top': 0})
+					_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
 				}
 			} else {
 				if(winPos > _self.endPos){
-					_self.$ele.css({'position': 'absolute', 'top': _self.bottomTop})
+					_self.$ele.css({'position': 'absolute', 'top': _self.bottomTop, 'left': 0})
 				} else if(winPos < _self.startPos) {
-					_self.$ele.css({'position': 'static', 'top': 0})
+					_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
 				} else if(winPos < _self.endPos && winPos > _self.startPos){
-					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop})
+					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
 				}
 			}
 		},
@@ -188,7 +216,7 @@
 				, containerH = container.height()
 				, containerT = container.offset().top
 
-			_self.endPos = containerH - containerPb - containerBb - eleH + containerT
+			_self.endPos = containerH - containerPb - containerBb - eleH + containerT - _self.marginB - _self.fixTop
 			_self.bottomTop = _self.endPos - _self.startPos
 		},
 
