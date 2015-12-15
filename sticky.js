@@ -51,7 +51,6 @@
 			var _self = this
 
 			_self.config = $.extend({}, _self.defaults, _self.options)
-			// _self.fixTop = _self.config.sticky_top
 
 			if(!_self.hasSticky()){
 				_self.useFixed()
