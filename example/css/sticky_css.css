@@ -12,8 +12,6 @@ section{
 }
 
 .sticky_title{
-	position: -webkit-sticky;
-	position: sticky;
 	background-color: #555;
 	text-align: center;
 	padding: 10px;
