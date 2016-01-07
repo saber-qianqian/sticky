@@ -11,4 +11,7 @@ a mob page javascript component
 * 但是脱离文档流之后，left和right值会按方向生效
 * 同一父元素下，sticky元素会有先后顺序，有层级的概
 
+# 使用条件
+1.	在引用的时候，在js里面增加top、left值（限制单位是px）
+* 在目标DOM上增加style值（限制单位是px）
 
