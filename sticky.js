@@ -52,6 +52,10 @@
 
 			_self.config = $.extend({}, _self.defaults, _self.options)
 
+			_self.fixTop = _self.config.sticky_top
+			if(_self.fixTop == 'auto'){ _self.useFixedFlag = false }
+			_self.fixLeft = _self.config.sticky_left
+
 			if(!_self.hasSticky()){
 				_self.useFixed()
 			} else {
@@ -78,10 +82,7 @@
 
 		stickyCssAdd: function(){
 			var _self = this
-
-			_self.eleInit()
-
-			var old_style = _self.$ele.attr('style')
+				, old_style = _self.$ele.attr('style')
 
 			// 为啥不直接使用CSS
 			if(typeof old_style == 'string'){
@@ -90,13 +91,8 @@
 				old_style = 'position: -webkit-sticky;position: sticky;'
 			}
 
-			// 处理auto情况
-			if(!_self.useFixedFlag){
-				old_style += 'top:auto;'
-			} else{
-				old_style += 'top:' + _self.fixTop + 'px;'
-			}
-
+			if(_self.fixTop) old_style += 'top:' + _self.fixTop + 'px;'
+			if(_self.fixLeft) old_style += 'left: ' + _self.fixLeft + 'px;'
 
 			_self.$ele.attr('style', old_style)
 		},
