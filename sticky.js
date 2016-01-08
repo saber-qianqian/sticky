@@ -26,6 +26,10 @@
 		return id
 	}
 
+	function getIntValue($ele, style_name){
+		return parseInt($ele.css(style_name), 10) || 0
+	}
+
 	var Sticky = function(ele, options){
 		this.$ele = $(ele)
 		this.$win = $(window)
@@ -44,7 +48,8 @@
 		defaults: {
 			'infinity': false
 			, 'checkEle': true
-			, 'sticky_top': 0
+			, 'sticky_top': undefined
+			, 'sticky_left': undefined
 		},
 
 		init: function(){
@@ -82,33 +87,29 @@
 
 		stickyCssAdd: function(){
 			var _self = this
-				, old_style = _self.$ele.attr('style')
 
-			// 为啥不直接使用CSS
-			if(typeof old_style == 'string'){
-				old_style += ';position: -webkit-sticky;position: sticky;'
-			} else {
-				old_style = 'position: -webkit-sticky;position: sticky;'
-			}
-
-			if(_self.fixTop) old_style += 'top:' + _self.fixTop + 'px;'
-			if(_self.fixLeft) old_style += 'left: ' + _self.fixLeft + 'px;'
-
-			_self.$ele.attr('style', old_style)
+			_self.$ele
+				.css('position', 'sticky')
+				.css({
+					'position': '-webkit-sticky'
+					, 'left': _self.fixLeft
+					, 'top': _self.fixTop
+				})
 		},
 
 		useFixed: function(){
 			var _self = this
 
 			_self.eleInit()
-			_self.parentInit()
+				.parentInit()
 
-			if(_self.useFixedFlag){
-				_self.setPos()
+			if(!_self.useFixedFlag) return _self
 
-				_self.handleScroll()
-				_self.bindEvents()
-			}
+			_self.setPos()
+				.handleScroll()
+				.bindEvents()
+
+			return _self
 		},
 
 		eleInit: function(){
@@ -120,9 +121,7 @@
 				, top = $ele.css('top')
 				, left = $ele.css('left')
 				, width = $ele.css('width')
-				, ele_style = {
-					'z-index' : 100
-				}
+				, ele_style = {}
 
 			if(top == 'auto'){
 				_self.useFixedFlag = false
@@ -140,15 +139,17 @@
 			$ele.css(ele_style)
 
 			// 搬家
-			_self.marginT = parseInt($ele.css('margin-top'), 10) || 0
-			_self.marginB = parseInt($ele.css('margin-bottom'), 10) || 0
-			_self.fixTop = parseInt($ele.css('top'), 10) || 0
+			_self.marginT = getIntValue($ele, 'margin-top')
+			_self.marginB = getIntValue($ele, 'margin-bottom')
+			_self.fixTop = getIntValue($ele, 'top')
 			_self.fixLeft = $ele.offset().left
 
 			// 计算正确的左右位置，必须在父元素框内
 			var fixML = (parseInt(left, 10) || 0) - _self.fixLeft
 			fixML = fixML > 0 ? fixML : 0
 			$ele.css('margin-left', fixML)
+
+			return _self
 		},
 
 		parentInit: function(){
@@ -166,27 +167,44 @@
 			$parent.css({'height': $parent.height(), 'width': $ele.width(), 'overflow': 'visible', 'margin-top': $ele.css('margin-top'), 'margin-bottom': $ele.css('margin-bottom')})
 
 			_self.$parent = $parent
+
+			return _self
 		},
 
 		handleScroll: function(){
 			var _self = this
 				, winPos = _self.$win.scrollTop()
+				, ele_style = {
+					'position' : 'fixed'
+					, 'top' : 0
+					, 'left' : 0
+					, 'margin-top' : 0
+				}
 
 			if(_self.config.infinity){
 				if(winPos > _self.startPos){
-					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
+					ele_style['top'] = _self.fixTop
+					ele_style['left'] = _self.fixLeft
 				} else {
-					_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
+					ele_style['position'] = 'static'
+					ele_style['margin-top'] = _self.marginT
 				}
 			} else {
 				if(winPos > _self.endPos){
-					_self.$ele.css({'position': 'absolute', 'top': _self.bottomTop, 'left': 0})
+					ele_style['position'] = 'absolute'
+					ele_style['top'] = _self.bottomTop
 				} else if(winPos < _self.startPos) {
-					_self.$ele.css({'position': 'static', 'top': 0, 'margin-top' : _self.marginT})
+					ele_style['position'] = 'static'
+					ele_style['margin-top'] = _self.marginT
 				} else if(winPos < _self.endPos && winPos > _self.startPos){
-					_self.$ele.css({'position': 'fixed', 'top': _self.fixTop, 'left' : _self.fixLeft, 'margin-top' : 0})
+					ele_style['top'] = _self.fixTop
+					ele_style['left'] = _self.fixLeft
 				}
 			}
+
+			_self.$ele.css(ele_style)
+
+			return _self
 		},
 
 		handleResize: function(){
@@ -201,16 +219,18 @@
 			_self.startPos = _self.$parent.offset().top - _self.fixTop
 
 			var container = _self.$parent.parent()
-				, containerPt = parseInt(container.css('padding-top'), 10) || 0
-				, containerPb = parseInt(container.css('padding-bottom'), 10) || 0
-				, containerBt = parseInt(container.css('border-top'), 10) || 0
-				, containerBb = parseInt(container.css('border-bottom'), 10) || 0
+				, containerPt = getIntValue(container, 'padding-top')
+				, containerPb = getIntValue(container, 'padding-bottom')
+				, containerBt = getIntValue(container, 'border-top')
+				, containerBb = getIntValue(container, 'border-bottom')
 				, eleH = _self.$ele.height()
 				, containerH = container.height()
 				, containerT = container.offset().top
 
 			_self.endPos = containerH - containerPb - containerBb - eleH + containerT - _self.marginB - _self.fixTop
 			_self.bottomTop = _self.endPos - _self.startPos
+
+			return _self
 		},
 
 		bindEvents: function() {
@@ -218,6 +238,8 @@
 
 			_self.$win.on('scroll.sticky' + _self.stickyIndex, $.proxy(_self.handleScroll, _self));
 			_self.$win.on('resize.sticky' + _self.stickyIndex, $.proxy(_self.handleResize, _self));
+
+			return _self
 		},
 
 		destroy: function(){
