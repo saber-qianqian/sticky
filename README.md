@@ -11,7 +11,9 @@ a mob page javascript component
 * 但是脱离文档流之后，left和right值会按方向生效
 * 同一父元素下，sticky元素会有先后顺序，有层级的概
 
-# 使用条件
-1.	在引用的时候，在js里面增加top、left值（限制单位是px）
-* 在目标DOM上增加style值（限制单位是px）
+# 备注
 
+* getcomputedstyle方法在各个浏览器取值不一样，在chrome和Firefox中取得元素(position:static;)的top值为设置值，而不是auto，但在Safari中取到为auto
+* 在IOS中表现正常
+* 在安卓中表现如IOS
+* sticky_top、sticky_left仅支持px单位
