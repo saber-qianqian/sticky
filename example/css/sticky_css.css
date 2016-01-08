@@ -47,7 +47,7 @@ section{
 /* left和top不影响文档流，所以和position:relative;还是有区别的 */
 .block_5 .sticky_title{ width: 60%;left: 20px;top: 200px; }
  /*但是脱离文档流之后，left和right值会按方向生效 */ /*todo*/
-.block_7 .sticky_title{ width: 200%;float: left;left: 1500px;top: 0; }
+.block_7 .sticky_title{ width: 90%;float: left;left: 1500px;top: 0; }
 
 /* 同一父元素下，sticky元素会有先后顺序，有层级的概念*/
 .block_6 .sticky_title:first-child{ width: 60%;padding: 50px 0; }

@@ -136,18 +136,27 @@
 			ele_style['z-index'] = $ele.css('position', 'relative').css('z-index')
 			$ele.css('position', 'static')
 
-			$ele.css(ele_style)
-
-			// 搬家
-			_self.marginT = getIntValue($ele, 'margin-top')
-			_self.marginB = getIntValue($ele, 'margin-bottom')
-			_self.fixTop = getIntValue($ele, 'top')
 			_self.fixLeft = $ele.offset().left
 
+			$ele.css(ele_style)
+
 			// 计算正确的左右位置，必须在父元素框内
-			var fixML = (parseInt(left, 10) || 0) - _self.fixLeft
-			fixML = fixML > 0 ? fixML : 0
-			$ele.css('margin-left', fixML)
+			var fixML = 0
+				, style_l = parseInt(left, 10) || 0
+				, style_pw = getIntValue(_self.$ele.parent(), 'width')
+				, style_w = parseInt(width, 10) || 0
+				, ele_left = _self.fixLeft
+
+			if(style_l > ele_left){
+				if(style_w < style_pw){
+					var max_ml = style_pw - style_w
+						, dd_ml = style_l - ele_left
+
+					fixML = dd_ml < max_ml ? dd_ml : max_ml - ele_left
+				}
+
+				$ele.css('margin-left', fixML)
+			}
 
 			return _self
 		},
@@ -215,6 +224,11 @@
 
 		setPos: function(){
 			var _self = this
+				, $ele = _self.$ele
+
+			_self.marginT = getIntValue($ele, 'margin-top')
+			_self.marginB = getIntValue($ele, 'margin-bottom')
+			_self.fixTop = getIntValue($ele, 'top')
 
 			_self.startPos = _self.$parent.offset().top - _self.fixTop
 
