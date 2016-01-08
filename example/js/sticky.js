@@ -1,3 +1,1 @@
 $('.sticky_title').stick()
-
-
